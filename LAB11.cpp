@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <fstream>
 #include <string>
 #include <ctime>
@@ -51,6 +51,45 @@ struct list
 
     }
 
+    //функция создания нового узла в списоке
+    void new_node(int _data, struct list s, int kolichestvo_el)
+    {
+       
+        cout << "\nПосле какого узла добавить новый (1 - " << kolichestvo_el-1 << ")\n";
+        int num_new_el;
+        cin >> num_new_el;
+
+        while (num_new_el > (kolichestvo_el - 1) || num_new_el == 0)
+        {
+            cout << "Такого узла нет, введите еще раз после какого узла добавить новый (1 - " << kolichestvo_el - 1 << ")\n";
+            cin >> num_new_el;
+        }
+
+        cout << "\nВведите данные нового элемента списка\n";
+        cin >> _data;
+
+        Node* current_node = head_node;
+        Node* current_node_ii = head_node;
+        Node* new_node = new Node(_data);
+    
+            for (int i = 1; i < num_new_el + 1; i++)
+            {
+                current_node_ii = current_node_ii->pointer_to_next_node;
+            }
+
+            for (int i = 1; i < num_new_el; i++)
+            {
+                current_node = current_node->pointer_to_next_node;
+            }
+
+            current_node->pointer_to_next_node = new_node;
+             current_node = new_node;
+            new_node->pointer_to_next_node = current_node_ii;
+            cout << "\nИзмененный список: \n";
+        s.print();
+    }
+    
+
     //функция вывода всего списка на экран
     void print() 
     {
@@ -94,8 +133,8 @@ struct list
     void one_del()
     {
         int num_del;
+        cout << "\nКакой элемент удалить?\n";
 
-        cout << "Какой элемент удалить?\n";
         cin >> num_del;
         num_del--;
 
@@ -129,8 +168,7 @@ struct list
     //запись списка в файл
     void file_copy(int kolichestvo_el)
     {
-        Node* current_node;
-        current_node = head_node;
+       //Node* current_node = head_node;
         ofstream file;
         file.open("F1.bin",  ofstream::app);
         if (!file.is_open())
@@ -139,20 +177,14 @@ struct list
         }
         else
         {
-            int x;
-            for (int i = 1; i < kolichestvo_el; i++)
-            {
-                x = current_node->data;
-                if (current_node->pointer_to_next_node == NULL)
-                {
-                    file.close();
-                }
-                else
-                { 
-                    file.write((char*)&x, sizeof(int));
-                    current_node = current_node->pointer_to_next_node;
-                }
-            }
+            Node* current_node = head_node;
+            int i = 1;
+            do 
+            {             
+                file.write((char*)&current_node->data, sizeof(int));
+                current_node = current_node->pointer_to_next_node;
+                i++;
+            } while (i <= kolichestvo_el);
         }
         file.close();
     }
@@ -168,16 +200,16 @@ struct list
             cout << "Ошибка открытия файла!\n";
         }
         else
-        {   
-             int x;
-                for (int i = 1; i < kolichestvo_el-1; i++)
-                {
-                    file.read((char*)&x, sizeof(int));
-                    s.push_back(x);
-                }
+        {
+            int x;
+            for (int i = 1; i <= kolichestvo_el; i++)
+            {
+                file.read((char*)&x, sizeof(int));
+                s.push_back(x);
+            }
         }
             file.close();
-        cout << "Востановленный список: \n\n";
+        cout << "Востановленный список: \n";
         s.print();
 
     }
@@ -214,6 +246,7 @@ struct list
                 cout << "Такого варианта нет, выберете снова\n";
             }
         }
+        cout << "\nСоздан список: \n";
     }
 };
 
@@ -227,7 +260,7 @@ int main()
     cout << "Сколько узлов в списке?\n";
 
     list s;
-    int kolichestvo_el;
+    int kolichestvo_el, data_uzla{0};
     cin >> kolichestvo_el;
 
     while (kolichestvo_el < 0)
@@ -238,16 +271,20 @@ int main()
 
     if (kolichestvo_el == 0)
     {
-        cout << "Список пуст\n";
+        cout << "\nСписок пуст\n";
     }
     else
     {
         s.zapolnenie(kolichestvo_el, s);
+        
         s.print();
+
         s.one_del();
 
-        cout << "Список после внесенных изменний: \n";
+        cout << "\nСписок после внесенных изменний: \n";
         s.print();
+
+        s.new_node(data_uzla, s, kolichestvo_el);
 
         s.file_copy(kolichestvo_el);
 
